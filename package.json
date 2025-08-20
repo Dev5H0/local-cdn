@@ -5,7 +5,7 @@
 	"private": true,
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"dev": "bun run --watch src/index.ts",
+		"dev": "bun run --watch server.ts",
 		"biome:lint": "bunx biome lint --write",
 		"biome:format": "bunx biome lint --write",
 		"biome:check": "bunx biome check --write"
