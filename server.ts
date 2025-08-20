@@ -57,6 +57,6 @@ const app = new Elysia()
     },
   )
 
-  .listen(2005);
+  .listen(Bun.env.PORT || 3000);
 
 console.log(`Local CDN running -> ${app.server?.hostname}:${app.server?.port}${DIR_ASSETS}`);
