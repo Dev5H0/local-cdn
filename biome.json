@@ -7,10 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": [
-			"server.ts",
-			"Dockerfile"
-		]
+		"includes": ["server.ts", "Dockerfile"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -26,10 +23,11 @@
 		"formatter": {
 			"quoteStyle": "double",
 			"indentStyle": "space",
-			"indentWidth": 4,
+			"indentWidth": 2,
 			"trailingCommas": "all",
 			"semicolons": "always",
-			"expand": "auto"
+			"expand": "auto",
+			"lineWidth": 200
 		}
 	},
 	"assist": {
