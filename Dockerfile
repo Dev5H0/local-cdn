@@ -8,6 +8,8 @@ RUN bun install
 COPY server.ts ./
 COPY public ./public 
 
-EXPOSE 2005
+VOLUME ["/app/public"]
+
+EXPOSE 3000
 
 CMD ["bun", "server.ts"]
