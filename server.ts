@@ -1,44 +1,62 @@
+import { join } from "node:path";
 import cors from "@elysiajs/cors";
 import { staticPlugin } from "@elysiajs/static";
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 
-const PREFIX_ASSETS = "/assets";
+const DIR_ASSETS = "/assets";
+const DIR_UPLOAD = "public/uploads";
 
 const app = new Elysia()
-    .use(cors({ origin: true }))
-    .use(
-        staticPlugin({
-            assets: "public",
-            prefix: PREFIX_ASSETS,
-            indexHTML: false,
-        }),
-    )
+  .use(cors({ origin: true }))
+  .use(
+    staticPlugin({
+      assets: "public",
+      prefix: DIR_ASSETS,
+      indexHTML: false,
+    }),
+  )
 
-    .onAfterHandle(({ path, set }) => {
-        if (path.startsWith(`${PREFIX_ASSETS}/`)) {
-            set.headers["cache-control"] =
-                Bun.env.NODE_ENV === "production"
-                    ? "public, mage-age=3156000, immutable"
-                    : "no-cache";
-            set.headers["timing-allow-origin"] = "*";
-            set.headers["access-control-expose-headers"] =
-                "ETag, Content-Length";
-        }
-    })
+  .onAfterHandle(({ path, set }) => {
+    if (path.startsWith(`${DIR_ASSETS}/`)) {
+      set.headers["cache-control"] = Bun.env.NODE_ENV === "production" ? "public, mage-age=3156000, immutable" : "no-cache";
+      set.headers["timing-allow-origin"] = "*";
+      set.headers["access-control-expose-headers"] = "ETag, Content-Length";
+    }
+  })
 
-    .get("/", () => {
-        return new Response(
-            `<h1>Local CDN</h1>
-      <p>Try <code>${PREFIX_ASSETS}/docs</code> or <code>${PREFIX_ASSETS}/imgs</code></p>`,
-            {
-                headers: {
-                    "Content-Type": "text/html, charset=utf-8",
-                },
-            },
-        );
-    })
-    .listen(2005);
+  .get("/", () => {
+    return new Response(
+      `
+                <form method="POST" action="/upload" enctype="multipart/form-data">
+                    <input type="file" name="files" multiple />
+                    <button type="submit">Upload</button>
+                </form>
+                <p>Uploads available at: <code>${DIR_ASSETS}/uploads/...</code></p>
+            `,
+      {
+        headers: {
+          "Content-Type": "text/html, charset=utf-8",
+        },
+      },
+    );
+  })
 
-console.log(
-    `Local CDN running -> ${app.server?.hostname}:${app.server?.port}${PREFIX_ASSETS}`,
-);
+  .post(
+    "/upload",
+    async ({ body: { files } }) => {
+      [...files].forEach(async (f) => {
+        await Bun.write(join(DIR_UPLOAD, f.name), f);
+      });
+      return files;
+    },
+    {
+      body: t.Object({
+        files: t.Files(),
+      }),
+      parse: "multipart/form-data",
+    },
+  )
+
+  .listen(2005);
+
+console.log(`Local CDN running -> ${app.server?.hostname}:${app.server?.port}${DIR_ASSETS}`);
